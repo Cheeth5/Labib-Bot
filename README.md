@@ -25,6 +25,8 @@ It detects and collects plastic waste and identifies people littering on beaches
 - Fine-tuned YOLOv11-pose model for littering detection
 - Trained on 10,000+ pose samples (~76% accuracy)
 - Edge inference on Jetson Xavier
+## 📄 License
+This is a proprietary project owned by PlastiFind. All rights reserved.
 
 
 ![5Untitled](https://github.com/user-attachments/assets/4ade1eee-f89a-4a6b-b3f4-a0b67f62c5f5)
