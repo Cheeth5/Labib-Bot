@@ -27,5 +27,7 @@ It detects and collects plastic waste and identifies people littering on beaches
 - Edge inference on Jetson Xavier
 
 
+![5Untitled](https://github.com/user-attachments/assets/4ade1eee-f89a-4a6b-b3f4-a0b67f62c5f5)
+
 
 
