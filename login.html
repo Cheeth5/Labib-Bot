@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LABI-BOT| NVIDIA SECURITY</title>
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Orbitron:wght@700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --nvidia-green: #76b900;
+            --nvidia-dark: #0d0d0d;
+            --cyber-gray: #1a1a1a;
+            --terminal-text: #e2e2e2;
+            --glow-effect: 0 0 10px var(--nvidia-green), 0 0 20px rgba(118, 185, 0, 0.3);
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: 'Rajdhani', sans-serif;
+            background-color: var(--nvidia-dark);
+            color: var(--terminal-text);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        /* Grid background (optimized) */
+        .grid-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                linear-gradient(rgba(13, 13, 13, 0.9) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(13, 13, 13, 0.9) 1px, transparent 1px);
+            background-size: 40px 40px;
+            z-index: 0;
+            opacity: 0.6;
+        }
+        
+        /* Scanline effect (optimized) */
+        .scanline {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(
+                to bottom,
+                transparent 0%,
+                rgba(118, 185, 0, 0.03) 50%,
+                transparent 100%
+            );
+            background-size: 100% 8px;
+            animation: scan 4s linear infinite;
+            z-index: 1;
+            pointer-events: none;
+        }
+        
+        @keyframes scan {
+            0% { background-position: 0 0; }
+            100% { background-position: 0 100%; }
+        }
+        
+        /* Floating particles (optimized) */
+        .particles {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+        }
+        
+        .particle {
+            position: absolute;
+            background-color: var(--nvidia-green);
+            border-radius: 50%;
+            opacity: 0;
+            animation: float 15s infinite linear;
+            filter: blur(1px);
+            will-change: transform, opacity; /* Optimizes GPU rendering */
+        }
+        
+        @keyframes float {
+            0% { 
+                transform: translateY(0) translateX(0); 
+                opacity: 0;
+            }
+            10% { opacity: 0.3; }
+            50% { 
+                transform: translateY(-100px) translateX(100px); 
+                opacity: 0.8;
+            }
+            100% { 
+                transform: translateY(0) translateX(0); 
+                opacity: 0;
+            }
+        }
+        
+        .login-container {
+            width: 100%;
+            max-width: 480px;
+            padding: 2rem;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .login-card {
+            background: rgba(26, 26, 26, 0.8);
+            border-radius: 4px;
+            padding: 3rem 2.5rem;
+            box-shadow: 
+                0 0 30px rgba(118, 185, 0, 0.2),
+                inset 0 0 0 1px rgba(118, 185, 0, 0.1);
+            border-top: 3px solid var(--nvidia-green);
+            position: relative;
+            overflow: hidden;
+            backdrop-filter: blur(5px);
+        }
+        
+        .login-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(
+                45deg,
+                transparent 0%,
+                rgba(118, 185, 0, 0.05) 50%,
+                transparent 100%
+            );
+            transform: rotate(45deg);
+            animation: shine 6s infinite linear;
+            z-index: -1;
+        }
+        
+        @keyframes shine {
+            0% { transform: translateX(-100%) rotate(45deg); }
+            100% { transform: translateX(100%) rotate(45deg); }
+        }
+        
+        .logo {
+            height: 60px;
+            width: auto;
+            margin: 0 auto 1.5rem;
+            display: block;
+            filter: drop-shadow(var(--glow-effect));
+        }
+        
+        h1 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.8rem;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 2rem;
+            letter-spacing: 3px;
+            color: var(--nvidia-green);
+            text-shadow: var(--glow-effect);
+            text-transform: uppercase;
+        }
+        
+        .access-code {
+            font-family: 'Rajdhani', sans-serif;
+            font-weight: 600;
+            text-align: center;
+            margin-bottom: 2rem;
+            color: var(--nvidia-green);
+            letter-spacing: 1px;
+        }
+        
+        .input-group {
+            margin-bottom: 1.8rem;
+            position: relative;
+        }
+        
+        .input-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: var(--nvidia-green);
+            text-transform: uppercase;
+            font-size: 0.9rem;
+            letter-spacing: 1px;
+        }
+        
+        .input-field {
+            width: 100%;
+            padding: 1rem;
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(118, 185, 0, 0.3);
+            border-radius: 2px;
+            color: white;
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 1rem;
+            font-weight: 500;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            outline: none;
+            position: relative;
+            z-index: 1;
+            letter-spacing: 1px;
+        }
+        
+        .input-field:hover {
+            border-color: var(--nvidia-green);
+            box-shadow: 0 0 10px rgba(118, 185, 0, 0.2);
+        }
+        
+        .input-field:focus {
+            border-color: var(--nvidia-green);
+            box-shadow: 0 0 15px rgba(118, 185, 0, 0.4);
+            background: rgba(0, 0, 0, 0.6);
+        }
+        
+        .input-icon {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--nvidia-green);
+            pointer-events: none;
+        }
+        
+        .password-toggle {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            color: rgba(118, 185, 0, 0.7);
+            z-index: 2;
+            transition: all 0.3s ease;
+        }
+        
+        .password-toggle:hover {
+            color: var(--nvidia-green);
+            transform: translateY(-50%) scale(1.1);
+        }
+        
+        .login-btn {
+            width: 100%;
+            padding: 1rem;
+            background: linear-gradient(90deg, var(--nvidia-green), #3a9e28);
+            border: none;
+            border-radius: 2px;
+            color: var(--nvidia-dark);
+            font-weight: 700;
+            font-family: 'Orbitron', sans-serif;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            position: relative;
+            overflow: hidden;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            box-shadow: 0 0 15px rgba(118, 185, 0, 0.3);
+        }
+        
+        .login-btn:hover {
+            box-shadow: 0 0 25px rgba(118, 185, 0, 0.5);
+        }
+        
+        .error-message {
+            color: #ff4d4d;
+            text-align: center;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            font-weight: 600;
+        }
+        
+        .status-lights {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 2rem;
+        }
+        
+        .status-light {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: var(--cyber-gray);
+            box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.5);
+            position: relative;
+        }
+        
+        .status-light::after {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--nvidia-green);
+            opacity: 0;
+            animation: blink 4s infinite;
+        }
+        
+        .status-light:nth-child(1)::after {
+            animation-delay: 0.5s;
+        }
+        
+        .status-light:nth-child(2)::after {
+            animation-delay: 1s;
+        }
+        
+        .status-light:nth-child(3)::after {
+            animation-delay: 1.5s;
+        }
+        
+        @keyframes blink {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 1; }
+        }
+        
+        .loading-spinner {
+            display: none;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(118, 185, 0, 0.3);
+            border-radius: 50%;
+            border-top-color: var(--nvidia-green);
+            animation: spin 1s ease-in-out infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="grid-overlay"></div>
+    <div class="scanline"></div>
+    <div class="particles" id="particles"></div>
+    
+    <div class="login-container">
+        <div class="login-card">
+            <img src="{{ url_for('static', filename='L.png') }}" alt="AI Security Logo" class="logo">
+            <h1>LABI SECURE PORTAL</h1>
+            <div class="access-code">AUTHENTICATION REQUIRED</div>
+            
+            {% if error %}
+            <div class="error-message">
+                <i class="fas fa-exclamation-triangle"></i> {{ error }}
+            </div>
+            {% endif %}
+            
+ <form method="POST" action="/login">
+    <div class="input-group">
+        <label class="input-label">ENGINEER ID</label>
+        <div style="position: relative;">
+            <input type="text" name="username" class="input-field" placeholder="ENTER NVIDIA ID" required aria-label="Engineer ID">
+            <i class="fas fa-user-shield input-icon" style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%);"></i>
+        </div>
+    </div>
+    
+    <div class="input-group">
+        <label class="input-label">CRYPTO KEY</label>
+        <div style="position: relative;">
+            <input type="password" id="password" name="password" class="input-field" placeholder="••••••••" required aria-label="Crypto Key">
+            <i class="fas fa-key input-icon" style="position: absolute; right: 40px; top: 50%; transform: translateY(-50%);"></i>
+            <i class="fas fa-eye password-toggle" id="togglePassword" style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); cursor: pointer;"></i>
+        </div>
+      </div>
+                
+                <button type="submit" class="login-btn" id="loginButton">
+                    <span id="buttonText"><i class="fas fa-microchip"></i> Authentication</span>
+                    <div class="loading-spinner" id="spinner"></div>
+                </button>
+                
+                   <!-- Add this footer section -->
+    <div class="credits-footer" style="
+        margin-top: 1.5rem;
+        text-align: center;
+        font-size: 0.8rem;
+        color: rgba(118, 185, 0, 0.7);
+        font-family: 'Rajdhani', sans-serif;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+        border-top: 1px solid rgba(118, 185, 0, 0.2);
+        padding-top: 0.8rem;
+    ">
+        <span style="text-shadow: 0 0 5px rgba(118, 185, 0, 0.3);">
+            <i class="fas fa-copyright" style="margin-right: 5px;"></i>
+            Powered by NVIDIA Jetson | Security App v1.0
+        </span>
+        <div style="font-size: 0.7rem; margin-top: 3px; color: rgba(118, 185, 0, 0.5);">
+            JR Team
+        </div>
+            </form>
+            
+            <div class="status-lights">
+                <div class="status-light"></div>
+                <div class="status-light"></div>
+                <div class="status-light"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Particle animation (optimized)
+        const particlesContainer = document.getElementById('particles');
+        const particleCount = 15; // Reduced for performance
+
+        for (let i = 0; i < particleCount; i++) {
+            const particle = document.createElement('div');
+            particle.classList.add('particle');
+            
+            // Random properties
+            const size = Math.random() * 3 + 1;
+            const posX = Math.random() * 100;
+            const posY = Math.random() * 100;
+            const delay = Math.random() * 15;
+            const duration = 10 + Math.random() * 20;
+            
+            particle.style.width = `${size}px`;
+            particle.style.height = `${size}px`;
+            particle.style.left = `${posX}%`;
+            particle.style.top = `${posY}%`;
+            particle.style.animationDelay = `${delay}s`;
+            particle.style.animationDuration = `${duration}s`;
+            
+            particlesContainer.appendChild(particle);
+        }
+
+        // Password toggle
+        const togglePassword = document.getElementById('togglePassword');
+        const password = document.getElementById('password');
+        
+        togglePassword.addEventListener('click', function() {
+            const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
+            password.setAttribute('type', type);
+            this.classList.toggle('fa-eye');
+            this.classList.toggle('fa-eye-slash');
+            
+            // Add temporary animation
+            this.style.transform = 'translateY(-50%) scale(1.3)';
+            setTimeout(() => {
+                this.style.transform = 'translateY(-50%) scale(1)';
+            }, 300);
+        });
+
+        // Form submission handler
+        document.querySelector('form').addEventListener('submit', function(e) {
+            const button = document.getElementById('loginButton');
+            const buttonText = document.getElementById('buttonText');
+            const spinner = document.getElementById('spinner');
+            
+            button.disabled = true;
+            buttonText.style.display = 'none';
+            spinner.style.display = 'block';
+            
+            // Simulate RTX authentication
+            setTimeout(() => {
+                buttonText.textContent = 'RTX AUTHENTICATING...';
+                buttonText.style.display = 'inline';
+                spinner.style.display = 'none';
+            }, 1500);
+        });
+    </script>
+</body>
+</html>

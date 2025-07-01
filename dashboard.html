@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Throwing Detection | NVIDIA Jetson</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Orbitron:wght@500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --nvidia-green: #76B900;
+            --nvidia-dark: #0D0D0D;
+            --card-bg: #1A1A1A;
+            --text-light: #F0F0F0;
+            --alert-red: #FF4D4D;
+            --accent-blue: #00A3FF;
+            --glass-effect: rgba(255, 255, 255, 0.05);
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--nvidia-dark);
+            color: var(--text-light);
+            min-height: 100vh;
+            background-image: 
+                radial-gradient(circle at 25% 25%, rgba(118, 185, 0, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 75% 75%, rgba(0, 163, 255, 0.15) 0%, transparent 50%);
+            overflow-x: hidden;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+            position: relative;
+        }
+        
+        /* Futuristic header with glass morphism */
+        header {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 3rem;
+            padding: 2rem;
+            background: var(--glass-effect);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            border: 1px solid rgba(118, 185, 0, 0.2);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+        }
+        
+        header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(
+                to bottom right,
+                transparent 0%,
+                rgba(118, 185, 0, 0.1) 50%,
+                transparent 100%
+            );
+            transform: rotate(30deg);
+            z-index: -1;
+            animation: shine 8s infinite linear;
+        }
+        
+        @keyframes shine {
+            0% { transform: rotate(30deg) translate(-20%, -20%); }
+            100% { transform: rotate(30deg) translate(20%, 20%); }
+        }
+        
+        .logo {
+            height: 80px;
+            width: auto;
+            filter: drop-shadow(0 0 10px rgba(118, 185, 0, 0.5));
+            transition: transform 0.3s ease;
+        }
+        
+        .logo:hover {
+            transform: scale(1.05);
+        }
+        
+        h1 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2.5rem;
+            font-weight: 500;
+            letter-spacing: 1px;
+            margin: 0;
+            background: linear-gradient(90deg, #76B900, #3A9E28);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 10px rgba(118, 185, 0, 0.3);
+        }
+        
+        .status-bar {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            max-width: 800px;
+            margin: 1rem auto;
+        }
+        
+        .status-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+        }
+        
+        .status-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background-color: var(--nvidia-green);
+            box-shadow: 0 0 10px var(--nvidia-green);
+        }
+        
+        /* Alert card with 3D effect */
+        .alert-card {
+            background: linear-gradient(145deg, #1E1E1E, #2A2A2A);
+            border-radius: 16px;
+            padding: 2rem;
+            margin: 3rem auto;
+            max-width: 900px;
+            box-shadow: 
+                0 10px 20px rgba(0, 0, 0, 0.3),
+                inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+            border-left: 5px solid var(--alert-red);
+            display: {% if image_file %}flex{% else %}none{% endif %};
+            flex-direction: column;
+            gap: 1rem;
+            position: relative;
+            overflow: hidden;
+            transform-style: preserve-3d;
+            transition: transform 0.3s ease;
+        }
+        
+        .alert-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(
+                45deg,
+                transparent 0%,
+                rgba(255, 77, 77, 0.1) 50%,
+                transparent 100%
+            );
+            animation: alertPulse 3s infinite;
+            z-index: -1;
+        }
+        
+        @keyframes alertPulse {
+            0% { opacity: 0.5; }
+            50% { opacity: 1; }
+            100% { opacity: 0.5; }
+        }
+        
+        .alert-card:hover {
+            transform: translateY(-5px) rotateX(2deg);
+        }
+        
+        .alert-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .alert-icon {
+            font-size: 2rem;
+            color: var(--alert-red);
+            animation: pulse 1.5s infinite;
+        }
+        
+        .alert-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--alert-red);
+        }
+        
+        .detection-time {
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.7);
+            margin-top: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        /* Enhanced image container */
+        .image-container {
+            margin: 3rem auto;
+            max-width: 900px;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 
+                0 15px 30px rgba(0, 0, 0, 0.4),
+                inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.3s ease;
+        }
+        
+        .image-container:hover {
+            transform: perspective(1000px) rotateX(1deg) translateY(-5px);
+        }
+        
+        .image-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(
+                135deg,
+                rgba(118, 185, 0, 0.1) 0%,
+                rgba(0, 163, 255, 0.1) 100%
+            );
+            z-index: 1;
+            pointer-events: none;
+        }
+        
+        .detection-image {
+            width: 100%;
+            display: block;
+            transition: transform 0.5s ease;
+        }
+        
+        .image-container:hover .detection-image {
+            transform: scale(1.02);
+        }
+        
+        .placeholder {
+            padding: 4rem 2rem;
+            text-align: center;
+            background: var(--glass-effect);
+            backdrop-filter: blur(5px);
+            border-radius: 16px;
+            color: rgba(255, 255, 255, 0.5);
+            border: 1px dashed rgba(255, 255, 255, 0.1);
+        }
+        
+        .placeholder-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            opacity: 0.3;
+        }
+        
+        /* Stats panel */
+        .stats-panel {
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin: 2rem auto;
+            max-width: 900px;
+        }
+        
+        .stat-card {
+            background: var(--glass-effect);
+            backdrop-filter: blur(5px);
+            border-radius: 12px;
+            padding: 1.5rem;
+            min-width: 150px;
+            text-align: center;
+            border: 1px solid rgba(118, 185, 0, 0.2);
+            transition: transform 0.3s ease;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+            background: rgba(118, 185, 0, 0.1);
+        }
+        
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            background: linear-gradient(90deg, #76B900, #00A3FF);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 0.5rem;
+        }
+        
+        .stat-label {
+            font-size: 0.8rem;
+            opacity: 0.8;
+        }
+        
+        /* Footer with animated gradient border */
+        footer {
+            text-align: center;
+            margin-top: 4rem;
+            padding-top: 2rem;
+            position: relative;
+        }
+        
+        footer::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80%;
+            max-width: 600px;
+            height: 1px;
+            background: linear-gradient(
+                90deg,
+                transparent 0%,
+                rgba(118, 185, 0, 0.5) 50%,
+                transparent 100%
+            );
+        }
+        
+        .footer-text {
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.5);
+        }
+        
+        /* Animations */
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+            
+            header {
+                padding: 1.5rem;
+            }
+            
+            h1 {
+                font-size: 1.8rem;
+            }
+            
+            .logo {
+                height: 60px;
+            }
+            
+            .alert-card, .image-container {
+                margin: 2rem auto;
+            }
+            
+            .stat-card {
+                min-width: 120px;
+                padding: 1rem;
+            }
+            
+            .stat-value {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Futuristic header with logo -->
+        <header>
+            <img src="{{ url_for('static', filename='L.png') }}" alt="AI Security Logo" class="logo">
+            <h1>THROWING DETECTION SYSTEM</h1>
+            <div class="status-bar">
+                <div class="status-item">
+                    <div class="status-indicator"></div>
+                    <span>AI ACTIVE</span>
+                </div>
+                <div class="status-item">
+                    <i class="fas fa-shield-alt"></i>
+                    <span>SECURITY MODE</span>
+                </div>
+                <div class="status-item">
+                    <i class="fas fa-bolt"></i>
+                    <span>REALTIME</span>
+                </div>
+            </div>
+        </header>
+        
+        <!-- Stats panel -->
+        <div class="stats-panel">
+            <div class="stat-card">
+                <div class="stat-value">{{ detection_count }}</div>
+                <div class="stat-label">TOTAL DETECTIONS</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">24/7</div>
+                <div class="stat-label">MONITORING</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">&lt;1s</div>
+                <div class="stat-label">RESPONSE TIME</div>
+            </div>
+        </div>
+        
+        <!-- Alert card (shown only when detection occurs) -->
+        {% if image_file %}
+        <div class="alert-card">
+            <div class="alert-header">
+                <i class="fas fa-exclamation-triangle alert-icon"></i>
+                <h2 class="alert-title">SECURITY ALERT: THROWING DETECTED</h2>
+            </div>
+            <p>Our AI system has identified a potential throwing motion. The incident has been recorded for review.</p>
+            <div class="detection-time">
+                <i class="far fa-clock"></i>
+                <span>Detected at: {{ detection_time }}</span>
+            </div>
+        </div>
+        {% endif %}
+        
+        <!-- Image container with hover effects -->
+        <div class="image-container">
+            {% if image_file %}
+                <img src="{{ url_for('serve_detection', filename=image_file) }}" alt="Detection Capture" class="detection-image">
+            {% else %}
+                <div class="placeholder">
+                    <i class="fas fa-camera placeholder-icon"></i>
+                    <p>Awaiting first detection</p>
+                    <small>System is actively monitoring</small>
+                </div>
+            {% endif %}
+        </div>
+        
+        <!-- Footer with animated border -->
+        <footer>
+            <p class="footer-text">Powered by NVIDIA Jetson |  Security App v1.0 'JR-team'</p>
+        </footer>
+    </div>
+    
+    <!-- Auto-refresh and animations -->
+    <script>
+        // Auto-refresh every 5 seconds
+        setTimeout(function(){
+            window.location.reload();
+        }, 5000);
+        
+        // Add interactive elements
+        document.addEventListener('DOMContentLoaded', function() {
+            // Animate stat cards on hover
+            const statCards = document.querySelectorAll('.stat-card');
+            statCards.forEach(card => {
+                card.addEventListener('mouseenter', () => {
+                    card.style.transform = 'translateY(-5px)';
+                });
+                card.addEventListener('mouseleave', () => {
+                    card.style.transform = '';
+                });
+            });
+            
+            // Add parallax effect to header
+            const header = document.querySelector('header');
+            window.addEventListener('mousemove', (e) => {
+                const x = e.clientX / window.innerWidth;
+                const y = e.clientY / window.innerHeight;
+                header.style.transform = `perspective(1000px) rotateX(${(y - 0.5) * 2}deg) rotateY(${(x - 0.5) * 2}deg)`;
+            });
+        });
+    </script>
+</body>
+</html>
