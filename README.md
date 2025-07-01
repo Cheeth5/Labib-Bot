@@ -26,9 +26,6 @@ It detects and collects plastic waste and identifies people littering on beaches
 - Trained on 10,000+ pose samples (~76% accuracy)
 - Edge inference on Jetson Xavier
 
-## 🚀 Getting Started
-Coming soon…
 
-## 📄 License
-To be added (MIT recommended or proprietary).
+
 
