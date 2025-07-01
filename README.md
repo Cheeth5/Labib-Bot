@@ -22,7 +22,7 @@ It detects and collects plastic waste and identifies people littering on beaches
 - `docs/`: Architecture diagrams, flowcharts
 
 ## 🧠 AI Details
-- Fine-tuned YOLOv7-pose model for littering detection
+- Fine-tuned YOLOv11-pose model for littering detection
 - Trained on 10,000+ pose samples (~76% accuracy)
 - Edge inference on Jetson Xavier
 
