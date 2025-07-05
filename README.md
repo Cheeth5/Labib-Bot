@@ -1,4 +1,4 @@
-# 🤖 Labib-Bot by PlastiFind
+# 🤖 Labib-Bot 
 
 **Labib-Bot** is an autonomous beach-cleaning robot powered by edge AI.  
 It detects and collects plastic waste and identifies people littering on beaches using a real-time pose estimation model.
